@@ -1,0 +1,151 @@
+<!-- <mat-drawer-container>
+  <mat-drawer mode="side" opened class="sidenav"> 
+    <ul class="nav navbar-nav">
+      <li [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}"><a [routerLink]="''" (click)="back()">Employee</a></li>
+      <li [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}"><a [routerLink]="'/loan'" (click)="showloanData()">Loan</a></li>
+  </ul>
+  </mat-drawer>
+   <mat-drawer-content *ngIf="!id">
+    <router-outlet></router-outlet> -->
+    <!--
+    <button *ngIf="!showTaskboard &&  !showFilterData && !showLoanboard" mat-raised-button color="primary" (click)="openDialog()" class="btn-add-employee">Add Employee</button> 
+    <a *ngIf="!showTaskboard &&  !showFilterData && !showLoanboard " [routerLink]="'taskboard'" (click)="showTaskboardData()" class="link-taskboard">Taskboard</a>
+    <a *ngIf="!showFilterData && !showTaskboard && !showLoanboard" [routerLink]="'filterdata'" (click)="showFilterdataScreen()" class="link-taskboard">filterData</a>
+    <a *ngIf="showTaskboard || showFilterData " [routerLink]="''" (click)="back()">Back</a>
+    <table  width="100%" *ngIf="!showTaskboard && !showFilterData && !showLoanboard" mat-table [dataSource]="employeeData" class="mat-elevation-z8 table-wrapper" matSort>
+      
+    
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef> <span class="thead-title">SN</span>
+        <span (click)="sortData('id', 'ASC')" class="uparrow"></span>
+        <span (click)="sortData('id', 'DESC')" class="downarrow"></span> 
+        </th>
+        <td mat-cell *matCellDef="let element"> {{element.id}} </td>
+      </ng-container>
+      
+      
+        <ng-container matColumnDef="fname">
+          <th  mat-header-cell *matHeaderCellDef> 
+            <span class="thead-title">Emp code</span>
+            <span (click)="sortData('fname', 'ASC')" class="uparrow"></span>
+            <span (click)="sortData('fname', 'DESC')" class="downarrow"></span>
+          </th>
+          <td mat-cell *matCellDef="let element"> {{element.fname}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="fullname"> 
+          
+            <th mat-header-cell *matHeaderCellDef (click)="sortData('fullname','DESC')"> 
+            <span class="thead-title">fullname </span>
+            <span (click)="sortData('fullname', 'ASC')" class="uparrow"></span>
+            <span (click)="sortData('fullname', 'DESC')" class="downarrow"></span>
+          </th>
+          <td mat-cell *matCellDef="let element" mat-sort-header class="sort-arrow"> 
+            {{element.fullname}}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="lname">
+          <th mat-header-cell *matHeaderCellDef> 
+            <span class="thead-title">LastName</span> 
+            <span (click)="sortData('lname', 'ASC')" class="uparrow"></span>
+            <span (click)="sortData('lname', 'DESC')" class="downarrow"></span>
+          </th>
+          <td mat-cell *matCellDef="let element"> {{element.lname}} </td>
+        </ng-container>
+
+      <ng-container matColumnDef="dept">
+        <th mat-header-cell *matHeaderCellDef> 
+            <span class="thead-title">dept</span>
+            <span (click)="sortData('dept', 'ASC')" class="uparrow"></span>
+            <span (click)="sortData('dept', 'DESC')" class="downarrow"></span>
+        </th>
+        <td mat-cell *matCellDef="let element"> {{element.dept}} </td>
+      </ng-container>
+    
+      
+      <ng-container matColumnDef="age">
+          <th mat-header-cell *matHeaderCellDef> 
+            <span class="thead-title">age</span>
+            <span (click)="sortData('age', 'ASC')" class="uparrow"></span>
+            <span (click)="sortData('age', 'DESC')" class="downarrow"></span>
+          </th>
+        <td mat-cell *matCellDef="let element"> {{element.age}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="salary">
+          <th mat-header-cell *matHeaderCellDef> 
+            <span class="thead-title">salary</span>
+            <span (click)="sortData('salary', 'ASC')" class="uparrow"></span>
+            <span (click)="sortData('salary', 'DESC')" class="downarrow"></span>
+          </th>
+          <td mat-cell *matCellDef="let element"> {{element.salary}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="operation">
+          <th mat-header-cell *matHeaderCellDef> Details </th>
+          <td mat-cell *matCellDef="let element"> 
+            <button mat-raised-button color="primary" (click)="openDialog(element)" class="btn-update">Update</button> 
+            <button mat-raised-button color="primary" (click)="deleteEmployee(element.id)" class="btn-delete">Delete</button> 
+          </td>
+        </ng-container>
+        
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      
+    </table> -->
+ <!-- </mat-drawer-content> 
+</mat-drawer-container> -->
+
+<!-- <a routerLink="loan/overview">Overview</a>
+<a routerLink="loan/business-product">Business Product</a> -->
+
+<!-- <mat-sidenav-container class="example-container">
+  <mat-sidenav mode="side" opened>
+     <ul class="nav navbar-nav">
+          <li [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}"><a [routerLink]="''" (click)="back()">Employee</a></li>
+          <li [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}"><a [routerLink]="'/loan'" (click)="showloanData()">Loan</a></li>
+      </ul>
+  </mat-sidenav>
+  <mat-sidenav-content style="padding: 20px;"> <router-outlet></router-outlet></mat-sidenav-content>
+</mat-sidenav-container> -->
+
+<mat-sidenav-container class="example-container" [class.dark-theme]="isDarkTheme">
+  <mat-sidenav mode="side" opened class="sidebar">
+    <ul class="nav navbar-nav">
+      <li [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}">
+        <a [routerLink]="''" (click)="back()" class="sidebar-link" matTooltip="Employee">
+          <svg class="sidebar-svg-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          </svg>
+        </a>
+      </li>
+      <li [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}">
+        <a [routerLink]="'/loan'" (click)="showloanData()" class="sidebar-link" matTooltip="Loan">
+          <svg class="sidebar-svg-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M4 10v7h3v-7H4zm6 0v7h3v-7h-3zM2 22h19v-3H2v3zm14-12v7h3v-7h-3zm-4.5-9L2 6v2h19V6l-9.5-5z"/>
+          </svg>
+        </a>
+      </li>
+    </ul>
+  </mat-sidenav>
+  <mat-sidenav-content class="main-content">
+    <div class="content-area">
+      <div class="global-utils">
+        <button *ngIf="isHomeRoute" mat-raised-button color="primary" (click)="openAddEmployeeDialog()" class="btn-add-employee-corner">Add Employee</button>
+        <button mat-icon-button (click)="toggleTheme()" matTooltip="{{ isDarkTheme ? 'Light mode' : 'Dark mode' }}">
+          <mat-icon>{{ isDarkTheme ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        </button>
+        <div class="logo-container">
+          <div class="logo-n">N</div>
+          <div class="logo-text">
+            <div class="logo-main">NAZEER</div>
+            <div class="logo-sub">loan-app</div>
+          </div>
+        </div>
+      </div>
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
