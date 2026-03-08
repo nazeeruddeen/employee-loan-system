@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@angular/forms';
 import { SharedModule } from '../../shared/shared.module';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-salesreport',
@@ -20,6 +21,7 @@ export class SalesreportComponent {
   successMessage = '';
   
   salesForm: FormGroup;
+  private readonly apiBase = environment.hostname?.trim?.() ? environment.hostname.trim() : 'http://localhost:8080';
 
   constructor(
     private http: HttpClient, 
@@ -60,7 +62,7 @@ export class SalesreportComponent {
     const formData = new FormData();
     formData.append('file', this.file, this.file.name);
     
-    this.http.post<any[]>('http://localhost:8080/loans/readExcel', formData).subscribe(
+    this.http.post<any[]>(this.apiBase + '/loans/readExcel', formData).subscribe(
       response => {
         const sanitized = this.normalizeUploadedReports(response ?? []);
         this.data = sanitized;
@@ -117,7 +119,7 @@ export class SalesreportComponent {
 
     const formData = this.reportsFormArray.value;
     
-    this.http.post<any[]>(`http://localhost:8080/loans/saveSalesReport/${this.id}`, formData).subscribe(    
+    this.http.post<any[]>(this.apiBase + '/loans/saveSalesReport/' + this.id, formData).subscribe(    
       response => {
         this.isLoading = false;
         this.successMessage = 'Data saved successfully!';
@@ -137,7 +139,7 @@ export class SalesreportComponent {
     this.isLoading = true;
     this.clearMessages();
     
-    this.http.get<any[]>(`http://localhost:8080/loans/getSalesReportDetails/${appId}`).subscribe(
+    this.http.get<any[]>(this.apiBase + '/loans/getSalesReportDetails/' + appId).subscribe(
       response => {
         this.data = response;
         this.populateForm(response);

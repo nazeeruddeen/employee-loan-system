@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: loan-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: employee_loan_system
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  loan-backend:
+    build:
+      context: ./backend
+    container_name: loan-backend
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/employee_loan_system?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    depends_on:
+      - mysql
+    ports:
+      - "8080:8080"
+
+  loan-frontend:
+    build:
+      context: ./frontend
+    container_name: loan-frontend
+    restart: unless-stopped
+    depends_on:
+      - loan-backend
+    ports:
+      - "4200:80"
+
+volumes:
+  mysql_data:

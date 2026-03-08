@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@angular/forms';
 import { SharedModule } from '../../shared/shared.module';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-assurancedetails',
@@ -20,6 +21,7 @@ export class AssurancedetailsComponent {
   successMessage = '';
   
   personForm: FormGroup;
+  private readonly apiBase = environment.hostname?.trim?.() ? environment.hostname.trim() : 'http://localhost:8080';
 
   constructor(
     private http: HttpClient, 
@@ -60,7 +62,7 @@ export class AssurancedetailsComponent {
     const formData = new FormData();
     formData.append('file', this.file, this.file.name);
     
-    this.http.post<any[]>('http://localhost:8080/loans/readJson', formData).subscribe(
+    this.http.post<any[]>(this.apiBase + '/loans/readJson', formData).subscribe(
       response => {
         this.data = response;
         this.populateForm(response);
@@ -112,7 +114,7 @@ export class AssurancedetailsComponent {
 
     const formData = this.personsFormArray.value;
     
-    this.http.post<any[]>(`http://localhost:8080/loans/saveJsonfileData/${this.id}`, formData).subscribe(    
+    this.http.post<any[]>(this.apiBase + '/loans/saveJsonfileData/' + this.id, formData).subscribe(    
       response => {
         this.isLoading = false;
         this.successMessage = 'Data saved successfully!';
@@ -132,7 +134,7 @@ export class AssurancedetailsComponent {
     this.isLoading = true;
     this.clearMessages();
     
-    this.http.get<any[]>(`http://localhost:8080/loans/getPersonDetails/${appId}`).subscribe(
+    this.http.get<any[]>(this.apiBase + '/loans/getPersonDetails/' + appId).subscribe(
       response => {
         this.data = response;
         this.populateForm(response);
