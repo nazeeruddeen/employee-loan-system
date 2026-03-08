@@ -18,4 +18,5 @@ metadata:
   namespace: loan-system
 data:
   mysql-database: employee_loan_system
-  spring-datasource-url: jdbc:mysql://mysql:3306/employee_loan_system?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+  spring-datasource-url: jdbc:mysql://mysql:3306/employee_loan_system?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+
