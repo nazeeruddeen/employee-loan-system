@@ -8,6 +8,8 @@ stringData:
   mysql-root-password: root
   mysql-username: root
   mysql-password: root
+  mysql-app-username: loanapp
+  mysql-app-password: loanapp123
 ---
 apiVersion: v1
 kind: ConfigMap

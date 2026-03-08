@@ -29,6 +29,16 @@ spec:
                 configMapKeyRef:
                   name: loan-db-config
                   key: mysql-database
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: loan-db-secret
+                  key: mysql-app-username
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: loan-db-secret
+                  key: mysql-app-password
           volumeMounts:
             - name: mysql-data
               mountPath: /var/lib/mysql

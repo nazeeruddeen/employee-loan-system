@@ -32,8 +32,8 @@ pipeline {
                         bat 'docker version'
                     }
                     if (params.DEPLOY_K8S) {
+                        bat 'minikube version'
                         bat 'kubectl version --client'
-                        bat 'kubectl config current-context'
                     }
                 }
             }
@@ -72,6 +72,20 @@ pipeline {
             }
         }
 
+        stage('Prepare Kubernetes') {
+            when {
+                expression { return params.DEPLOY_K8S }
+            }
+            steps {
+                bat 'minikube start --driver=docker'
+                bat 'kubectl config use-context minikube'
+                bat 'kubectl cluster-info'
+                bat 'kubectl get nodes'
+                bat 'minikube image load loan-system/backend:latest'
+                bat 'minikube image load loan-system/frontend:latest'
+            }
+        }
+
         stage('Deploy Kubernetes') {
             when {
                 expression { return params.DEPLOY_K8S }
@@ -83,9 +97,28 @@ pipeline {
                 bat 'kubectl apply -f k8s/03-backend.yaml'
                 bat 'kubectl apply -f k8s/04-frontend.yaml'
 
-                bat 'kubectl -n loan-system rollout status deploy/mysql --timeout=240s'
-                bat 'kubectl -n loan-system rollout status deploy/loan-backend --timeout=240s'
-                bat 'kubectl -n loan-system rollout status deploy/loan-frontend --timeout=240s'
+                bat '''
+                    kubectl -n loan-system rollout status deploy/mysql --timeout=240s
+                    if errorlevel 1 exit /b 1
+
+                    kubectl -n loan-system rollout status deploy/loan-backend --timeout=300s
+                    if errorlevel 1 (
+                        echo Backend rollout failed. Dumping diagnostics...
+                        kubectl -n loan-system get pods -o wide
+                        kubectl -n loan-system describe deployment loan-backend
+                        kubectl -n loan-system logs deployment/loan-backend --tail=200
+                        exit /b 1
+                    )
+
+                    kubectl -n loan-system rollout status deploy/loan-frontend --timeout=240s
+                    if errorlevel 1 (
+                        echo Frontend rollout failed. Dumping diagnostics...
+                        kubectl -n loan-system get pods -o wide
+                        kubectl -n loan-system describe deployment loan-frontend
+                        kubectl -n loan-system logs deployment/loan-frontend --tail=200
+                        exit /b 1
+                    )
+                '''
                 bat 'kubectl -n loan-system get pods -o wide'
                 bat 'kubectl -n loan-system get svc'
             }
@@ -125,3 +158,4 @@ pipeline {
         }
     }
 }
+
