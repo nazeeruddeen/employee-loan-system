@@ -89,9 +89,28 @@ export class EmployeeDataService {
     return this.httpClient.post(this.hostUrl + `/loans/saveJsonfileData/${appId}`, data, { observe: 'response' });
   }
 
-  getFilteredTransactions(appid: number, statusOrInstrument: string, statusOrInstrumentTypesList: string[]): Observable<any> {
-    const endpoint = `${this.hostUrl}/loans/filtertransactions/${appid}?statusOrInstrument=${statusOrInstrument}&statusOrInstrumentTypesList=${statusOrInstrumentTypesList.join(',')}`;
-    return this.httpClient.get(endpoint);
+  getFilteredTransactions(appid: number, statusList: string[], instrumentList: string[]): Observable<any> {
+    let params = new HttpParams();
+
+    statusList.forEach((status) => {
+      params = params.append('statusList', status);
+    });
+
+    instrumentList.forEach((instrument) => {
+      params = params.append('instrumentList', instrument);
+    });
+
+    // Backward compatibility for older backend contracts.
+    const legacyValues = [...statusList, ...instrumentList];
+    if (legacyValues.length > 0) {
+      params = params.append('statusOrInstrument', 'all');
+      legacyValues.forEach((value) => {
+        params = params.append('statusOrInstrumentTypesList', value);
+      });
+    }
+
+    const endpoint = `${this.hostUrl}/loans/filtertransactions/${appid}`;
+    return this.httpClient.get(endpoint, { params });
   }
 
   getTransactions(appId: any, duration?: string, startDate?: string, endDate?: string): Observable<Transaction[]> {
@@ -121,3 +140,4 @@ export class EmployeeDataService {
     return this.httpClient.put(this.hostUrl + `/loans/updateTransaction`, transactionData, { observe: 'response' });
   }
 }
+

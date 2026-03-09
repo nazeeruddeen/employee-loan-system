@@ -160,12 +160,24 @@ public class LoanController {
     @GetMapping("/filtertransactions/{appId}")
     public ResponseEntity<List<TransactionDTO>> filterTransactions(
             @PathVariable Long appId,
-            @RequestParam String statusOrInstrument,
-            @RequestParam List<String> statusOrInstrumentTypesList) {
-        return new ResponseEntity<>(
-                loanService.filterTransactions(appId, statusOrInstrument, statusOrInstrumentTypesList), HttpStatus.OK);
-    }
+            @RequestParam(required = false) List<String> statusList,
+            @RequestParam(required = false) List<String> instrumentList,
+            @RequestParam(required = false) String statusOrInstrument,
+            @RequestParam(required = false, name = "statusOrInstrumentTypesList") List<String> statusOrInstrumentTypesList) {
 
+        boolean hasNewFilterParams = (statusList != null && !statusList.isEmpty())
+                || (instrumentList != null && !instrumentList.isEmpty());
+
+        if (hasNewFilterParams) {
+            return new ResponseEntity<>(loanService.filterTransactions(appId, statusList, instrumentList), HttpStatus.OK);
+        }
+
+        List<String> legacyTypes = statusOrInstrumentTypesList == null ? List.of() : statusOrInstrumentTypesList;
+        String legacyMode = (statusOrInstrument == null || statusOrInstrument.isBlank()) ? "status" : statusOrInstrument;
+
+        return new ResponseEntity<>(
+                loanService.filterTransactions(appId, legacyMode, legacyTypes), HttpStatus.OK);
+    }
     @GetMapping("/getTxnsData/{appId}")
     public ResponseEntity<List<TransactionDTO>> getTxnsData(@PathVariable Long appId) {
         return new ResponseEntity<>(loanService.getTransactions(appId, null, null, null), HttpStatus.OK);
@@ -201,3 +213,4 @@ public class LoanController {
         }
     }
 }
+

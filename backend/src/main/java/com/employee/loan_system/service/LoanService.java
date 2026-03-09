@@ -10,7 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -349,20 +351,76 @@ public class LoanService {
                 .collect(Collectors.toList());
     }
 
-    public List<TransactionDTO> filterTransactions(Long appId, String statusOrInstrument, List<String> types) {
-        List<Transaction> transactions;
+    public List<TransactionDTO> filterTransactions(Long appId, List<String> statusList, List<String> instrumentList) {
+        Set<String> allowedStatuses = Set.of("SUCCESS", "PENDING", "FAILED", "CANCELLED", "COMPLETED", "PROCESSING", "ERROR");
+        Set<String> allowedInstruments = Set.of("CREDITCARD", "DEBITCARD", "UPI", "WALLET", "CASH", "BANK_TRANSFER", "CHEQUE");
 
-        if ("status".equalsIgnoreCase(statusOrInstrument)) {
-            transactions = transactionRepository.findByAppIdAndStatusIn(appId, types);
-        } else {
-            transactions = transactionRepository.findByAppIdAndInstrumentIn(appId, types);
-        }
+        List<String> normalizedStatuses = normalizeFilterValues(statusList).stream()
+                .filter(allowedStatuses::contains)
+                .collect(Collectors.toList());
+
+        List<String> normalizedInstruments = normalizeFilterValues(instrumentList).stream()
+                .filter(allowedInstruments::contains)
+                .collect(Collectors.toList());
+
+        List<Transaction> transactions = transactionRepository.findByLoanApplication_AppId(appId);
 
         return transactions.stream()
+                .filter(t -> normalizedStatuses.isEmpty() || normalizedStatuses.contains(
+                        t.getTransactionStatus() == null ? "" : t.getTransactionStatus().trim().toUpperCase()))
+                .filter(t -> normalizedInstruments.isEmpty() || normalizedInstruments.contains(
+                        t.getInstrument() == null ? "" : t.getInstrument().trim().toUpperCase()))
                 .map(this::convertTransactionToDTO)
                 .collect(Collectors.toList());
     }
 
+    public List<TransactionDTO> filterTransactions(Long appId, String statusOrInstrument, List<String> types) {
+        List<String> normalizedTypes = normalizeFilterValues(types);
+        Set<String> allowedStatuses = Set.of("SUCCESS", "PENDING", "FAILED", "CANCELLED", "COMPLETED", "PROCESSING", "ERROR");
+        Set<String> allowedInstruments = Set.of("CREDITCARD", "DEBITCARD", "UPI", "WALLET", "CASH", "BANK_TRANSFER", "CHEQUE");
+
+        List<String> statusList = normalizedTypes.stream()
+                .filter(allowedStatuses::contains)
+                .collect(Collectors.toList());
+
+        List<String> instrumentList = normalizedTypes.stream()
+                .filter(allowedInstruments::contains)
+                .collect(Collectors.toList());
+
+        // Backward-compatible behavior:
+        // derive both status and instrument groups from legacy mixed values, then
+        // apply OR-within-group and AND-between-groups.
+        if ("status".equalsIgnoreCase(statusOrInstrument) && instrumentList.isEmpty()) {
+            return filterTransactions(appId, statusList, List.of());
+        }
+        if ("instrument".equalsIgnoreCase(statusOrInstrument) && statusList.isEmpty()) {
+            return filterTransactions(appId, List.of(), instrumentList);
+        }
+
+        return filterTransactions(appId, statusList, instrumentList);
+    }
+
+    private List<String> normalizeFilterValues(List<String> values) {
+        List<String> normalized = new ArrayList<>();
+        if (values == null) {
+            return normalized;
+        }
+
+        for (String value : values) {
+            if (value == null || value.isBlank()) {
+                continue;
+            }
+
+            String[] tokens = value.split(",");
+            for (String token : tokens) {
+                if (token != null && !token.isBlank()) {
+                    normalized.add(token.trim().toUpperCase());
+                }
+            }
+        }
+
+        return normalized;
+    }
     @Transactional
     public List<TransactionDTO> saveTransactions(Long appId, List<TransactionDTO> dtos) {
         LoanApplication loan = loanRepository.findById(appId)

@@ -1,4 +1,3 @@
-import { HttpParams } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { EmployeeDataService } from '../../employee-data.service';
 import { SharedModule } from '../../shared/shared.module';
@@ -8,6 +7,10 @@ interface TransactionFilters {
   pending: boolean;
   failed: boolean;
   cancelled: boolean;
+  creditCard: boolean;
+  debitCard: boolean;
+  upi: boolean;
+  wallet: boolean;
 }
 
 @Component({
@@ -19,7 +22,7 @@ interface TransactionFilters {
 })
 export class TransactionfiltersComponent {
   transactions: any[] = [];
-  filters = {
+  filters: TransactionFilters = {
     success: false,
     pending: false,
     failed: false,
@@ -46,44 +49,33 @@ export class TransactionfiltersComponent {
       this.loadError = 'Application ID not found';
       return;
     }
-      let params = new HttpParams();
-    
-      // Define sets for status and instrument
-      const statusSet = new Set(['SUCCESS', 'PENDING', 'FAILED', 'CANCELLED']);
-      const instrumentSet = new Set(['CREDITCARD', 'DEBITCARD', 'UPI', 'WALLET']);
-    
-      // Loop over the filters object and add the selected filters to the params
-      let selectedFilters: string[] = [];
-      for (const key in this.filters) {
-        if (this.filters.hasOwnProperty(key) && this.filters[key as keyof TransactionFilters] === true) {
-          // Convert the filter key to the corresponding value expected by the backend
-          const filterValue = key.toUpperCase();
-          selectedFilters.push(filterValue);
-        }
-      }
-    
-      // Determine if the selected filters are related to status or instrument
-      let isStatus = selectedFilters.some(filter => statusSet.has(filter));
-      let isInstrument = selectedFilters.some(filter => instrumentSet.has(filter));
-    
-      // Set the 'statusOrInstrument' parameter accordingly
-      if (isStatus) {
-        params = params.set('statusOrInstrument', 'status');
-      } else if (isInstrument) {
-        params = params.set('statusOrInstrument', 'instrument');
-      }
-    
-    selectedFilters.forEach(filter => {
-      params = params.append('statusOrInstrumentTypesList', filter);
-    });
+
+    const selectedStatuses: string[] = [];
+    const selectedInstruments: string[] = [];
+
+    if (this.filters.success) selectedStatuses.push('SUCCESS');
+    if (this.filters.pending) selectedStatuses.push('PENDING');
+    if (this.filters.failed) selectedStatuses.push('FAILED');
+    if (this.filters.cancelled) selectedStatuses.push('CANCELLED');
+
+    if (this.filters.creditCard) selectedInstruments.push('CREDITCARD');
+    if (this.filters.debitCard) selectedInstruments.push('DEBITCARD');
+    if (this.filters.upi) selectedInstruments.push('UPI');
+    if (this.filters.wallet) selectedInstruments.push('WALLET');
+
+    if (selectedStatuses.length === 0 && selectedInstruments.length === 0) {
+      this.transactions = [];
+      this.loadError = 'Please select at least one status or instrument filter';
+      return;
+    }
 
     this.isLoading = true;
     this.loadError = null;
-    const statusOrInstrument = isStatus ? 'status' : (isInstrument ? 'instrument' : 'status');
+
     this.employeeDataService.getFilteredTransactions(
       Number(this.appId),
-      statusOrInstrument,
-      selectedFilters
+      selectedStatuses,
+      selectedInstruments
     ).subscribe({
       next: (data) => {
         this.transactions = Array.isArray(data) ? data : (data?.body ?? []);
@@ -96,13 +88,11 @@ export class TransactionfiltersComponent {
       }
     });
   }
-
   clearFilters(): void {
     for (const key in this.filters) {
-        if (this.filters.hasOwnProperty(key)) {
-            // Use the keyof keyword and type assertion here
-            this.filters[key as keyof typeof this.filters] = false;
-        }
+      if (Object.prototype.hasOwnProperty.call(this.filters, key)) {
+        this.filters[key as keyof TransactionFilters] = false;
+      }
     }
     this.transactions = [];
   }

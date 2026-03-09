@@ -19,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class FileProcessingService {
@@ -216,6 +217,7 @@ public class FileProcessingService {
         int dataStartRow = headerRowIndex >= 0 ? headerRowIndex + 1 : 0;
 
         int dateColumn = findCsvColumnIndex(headerRow, "date", "transaction date", "date & time", "date/time");
+        int timeColumn = findCsvColumnIndex(headerRow, "time", "txn time", "transaction time");
         int activityColumn = findCsvColumnIndex(headerRow, "activity", "description", "transaction details", "narration", "remarks");
         int sourceDestColumn = findCsvColumnIndex(headerRow, "source/destination", "source", "destination");
         int instrumentColumn = findCsvColumnIndex(headerRow, "instrument", "mode", "payment mode", "channel", "source");
@@ -239,16 +241,24 @@ public class FileProcessingService {
             }
 
             try {
-                String dateValue = firstNonBlank(
+                String rawDateValue = firstNonBlank(
                         getCsvValue(row, dateColumn, 0),
                         getCsvValue(row, 0, -1)
                 );
+                String rawTimeValue = firstNonBlank(
+                        getCsvValue(row, timeColumn, -1),
+                        extractTimeFromRow(row, dateColumn)
+                );
+                String dateValue = combineDateAndTime(rawDateValue, rawTimeValue);
+
                 LocalDateTime transactionDate = parseLocalDateTimeFlexible(dateValue);
+                if (transactionDate == null && !rawDateValue.equals(dateValue)) {
+                    transactionDate = parseLocalDateTimeFlexible(rawDateValue);
+                }
                 if (transactionDate == null) {
                     errors.add("Line " + (i + 1) + ": Invalid or missing transaction date");
                     continue;
                 }
-
                 String activity = firstNonBlank(
                         getCsvValue(row, activityColumn, 1),
                         getCsvValue(row, txnTypeColumn, -1),
@@ -447,6 +457,80 @@ public class FileProcessingService {
         return trimmed.length() <= maxLength ? trimmed : trimmed.substring(0, maxLength);
     }
 
+    private String combineDateAndTime(String dateValue, String timeValue) {
+        String datePart = cleanCsvValue(dateValue);
+        if (datePart.isEmpty()) {
+            return "";
+        }
+
+        if (containsTimeToken(datePart)) {
+            return datePart;
+        }
+
+        String timePart = cleanCsvValue(timeValue);
+        if (timePart.isEmpty()) {
+            return datePart;
+        }
+
+        if (isLikelyDateOnly(datePart) && isLikelyTimeValue(timePart)) {
+            return datePart + " " + timePart;
+        }
+
+        return datePart;
+    }
+
+    private String extractTimeFromRow(String[] row, int dateColumn) {
+        if (row == null || row.length == 0) {
+            return "";
+        }
+
+        if (dateColumn >= 0) {
+            for (int offset = 1; offset <= 2; offset++) {
+                int idx = dateColumn + offset;
+                if (idx >= 0 && idx < row.length) {
+                    String candidate = cleanCsvValue(row[idx]);
+                    if (isLikelyTimeValue(candidate)) {
+                        return candidate;
+                    }
+                }
+            }
+        }
+
+        for (String cell : row) {
+            String candidate = cleanCsvValue(cell);
+            if (isLikelyTimeValue(candidate)) {
+                return candidate;
+            }
+        }
+
+        return "";
+    }
+
+    private boolean containsTimeToken(String value) {
+        if (value == null) {
+            return false;
+        }
+        return value.matches(".*\\b\\d{1,2}:\\d{2}(:\\d{2})?\\b.*");
+    }
+
+    private boolean isLikelyTimeValue(String value) {
+        if (value == null) {
+            return false;
+        }
+        String input = cleanCsvValue(value);
+        return input.matches("^\\d{1,2}:\\d{2}(:\\d{2})?(\\s?[AaPp][Mm])?$");
+    }
+
+    private boolean isLikelyDateOnly(String value) {
+        if (value == null) {
+            return false;
+        }
+        String input = cleanCsvValue(value);
+        return input.matches("^\\d{4}[-/]\\d{2}[-/]\\d{2}$")
+                || input.matches("^\\d{2}[-/]\\d{2}[-/]\\d{4}$")
+                || input.matches("^\\d{1,2}[-/]\\d{1,2}[-/]\\d{4}$")
+                || input.matches("^\\d{1,2}\\.\\d{1,2}\\.\\d{4}$");
+    }
     private LocalDateTime parseLocalDateTimeFlexible(String value) {
         if (value == null || value.trim().isEmpty()) {
             return null;
@@ -455,16 +539,26 @@ public class FileProcessingService {
         String input = value.trim().replaceAll("\\s+", " ");
 
         DateTimeFormatter[] dateTimeFormatters = {
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"),
-                DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"),
-                DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"),
-                DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"),
-                DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"),
-                DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss"),
-                DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm"),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd H:mm", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("dd-MM-yyyy H:mm", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("dd/MM/yyyy H:mm", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("MM/dd/yyyy H:mm", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss a", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm a", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm:ss a", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("dd-MM-yyyy hh:mm a", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss a", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm a", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm", Locale.ENGLISH)
         };
 
         for (DateTimeFormatter formatter : dateTimeFormatters) {
@@ -476,12 +570,13 @@ public class FileProcessingService {
         }
 
         DateTimeFormatter[] dateFormatters = {
-                DateTimeFormatter.ofPattern("yyyy-MM-dd"),
-                DateTimeFormatter.ofPattern("dd-MM-yyyy"),
-                DateTimeFormatter.ofPattern("MM/dd/yyyy"),
-                DateTimeFormatter.ofPattern("dd/MM/yyyy"),
-                DateTimeFormatter.ofPattern("dd-MMM-yyyy"),
-                DateTimeFormatter.ofPattern("d/M/yyyy")
+                DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("dd-MM-yyyy", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("dd.M.yyyy", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ENGLISH),
+                DateTimeFormatter.ofPattern("d/M/yyyy", Locale.ENGLISH)
         };
 
         for (DateTimeFormatter formatter : dateFormatters) {
