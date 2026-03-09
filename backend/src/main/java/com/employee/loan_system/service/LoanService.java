@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -330,7 +331,7 @@ public class LoanService {
                     start = end.minusMonths(1);
             }
 
-            return transactionRepository.findByAppIdAndDateRange(appId, start, end).stream()
+            return transactionRepository.findByAppIdAndDateRange(appId, start.atStartOfDay(), end.atTime(LocalTime.MAX)).stream()
                     .map(this::convertTransactionToDTO)
                     .collect(Collectors.toList());
         } else if (startDate != null && endDate != null && !startDate.isEmpty() && !endDate.isEmpty()) {
@@ -338,7 +339,7 @@ public class LoanService {
             LocalDate sDate = LocalDate.parse(startDate, formatter);
             LocalDate eDate = LocalDate.parse(endDate, formatter);
 
-            return transactionRepository.findByAppIdAndDateRange(appId, sDate, eDate).stream()
+            return transactionRepository.findByAppIdAndDateRange(appId, sDate.atStartOfDay(), eDate.atTime(LocalTime.MAX)).stream()
                     .map(this::convertTransactionToDTO)
                     .collect(Collectors.toList());
         }
@@ -502,5 +503,4 @@ public class LoanService {
         return convertTransactionToDTO(updatedTransaction);
     }
 }
-
 

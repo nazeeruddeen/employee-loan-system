@@ -29,8 +29,8 @@
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-bottom: 2px solid #007DC5;
-  background-color: #007DC5 !important;
+  border-bottom: 2px solid var(--brand-primary, #0b5cab);
+  background-color: var(--brand-primary, #0b5cab) !important;
   color: white !important;
   text-align: center;
   vertical-align: middle;
@@ -67,7 +67,7 @@
 }
 
 .table-hover tbody tr:hover {
-  background-color: rgba(0, 125, 197, 0.05);
+  background-color: rgba(11, 92, 171, 0.06);
 }
 
 /* Form Control Styling */
@@ -213,7 +213,7 @@
 
 /* Hover effects for table rows */
 .table-hover tbody tr:hover {
-  background-color: rgba(13, 110, 253, 0.05);
+  background-color: rgba(11, 92, 171, 0.06);
 }
 
 /* Custom scrollbar for responsive tables */

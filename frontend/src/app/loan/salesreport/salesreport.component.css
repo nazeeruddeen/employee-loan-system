@@ -29,8 +29,8 @@
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.3px;
-  border-bottom: 2px solid #007dc5;
-  background-color: #007dc5 !important;
+  border-bottom: 2px solid var(--brand-primary, #0b5cab);
+  background-color: var(--brand-primary, #0b5cab) !important;
   color: #fff !important;
   text-align: center;
   vertical-align: middle;
@@ -60,7 +60,7 @@
 .table th:nth-child(9), .table td:nth-child(9) { min-width: 90px; }
 
 .table-hover tbody tr:hover {
-  background-color: rgba(0, 125, 197, 0.05);
+  background-color: rgba(11, 92, 171, 0.06);
 }
 
 .form-control,
@@ -124,3 +124,4 @@
     min-width: 920px;
   }
 }
+

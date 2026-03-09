@@ -1,5 +1,19 @@
 .overview-page {
   animation: fadeIn 0.25s ease-out;
+  width: 100%;
+  min-width: 0;
+}
+
+.tabbing-group {
+  width: 100%;
+  display: block;
+}
+
+:host ::ng-deep .tabbing-group .mat-mdc-tab-header,
+:host ::ng-deep .tabbing-group .mat-mdc-tab-header .mat-mdc-tab-label-container,
+:host ::ng-deep .tabbing-group .mat-mdc-tab-body-wrapper {
+  width: 100%;
+  min-width: 0;
 }
 
 .overview-page .back-link {
@@ -150,3 +164,4 @@
     --mat-tab-header-with-background-foreground-color: rgb(255, 255, 255);
    
 }
+

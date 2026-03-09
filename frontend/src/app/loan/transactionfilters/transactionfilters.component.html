@@ -168,7 +168,7 @@
               <table class="table table-striped table-hover">
                 <thead class="table-primary">
                   <tr>
-                    <th>Date</th>
+                    <th>Txn Date & Time</th>
                     <th>Activity</th>
                     <th>Instrument</th>
                     <th>Transaction ID</th>
@@ -181,7 +181,7 @@
                 </thead>
                 <tbody>
                   <tr *ngFor="let transaction of transactions">
-                    <td>{{ transaction.transactionDate | date:'dd/MM/yyyy' }}</td>
+                    <td>{{ transaction.transactionDate | date:'dd/MM/yyyy HH:mm' }}</td>
                     <td>
                       <span class="badge bg-info text-dark">{{ transaction.activity }}</span>
                     </td>
@@ -229,3 +229,4 @@
     </div>
   </div>
 </div>
+

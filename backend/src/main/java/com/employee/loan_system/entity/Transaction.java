@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "transactions")
@@ -23,8 +23,8 @@ public class Transaction {
     private LoanApplication loanApplication;
 
     @NotNull(message = "Transaction date is required")
-    @Column(name = "transaction_date")
-    private LocalDate transactionDate;
+    @Column(name = "transaction_date", columnDefinition = "DATETIME")
+    private LocalDateTime transactionDate;
 
     @NotBlank(message = "Activity is required")
     @Size(max = 100, message = "Activity must not exceed 100 characters")
@@ -52,13 +52,13 @@ public class Transaction {
     private String transactionBreakup;
 
     @NotBlank(message = "Transaction status is required")
-    @Pattern(regexp = "^(SUCCESS|PENDING|FAILED|CANCELLED|COMPLETED|PROCESSING|ERROR)$", 
+    @Pattern(regexp = "^(SUCCESS|PENDING|FAILED|CANCELLED|COMPLETED|PROCESSING|ERROR)$",
              message = "Status must be one of: SUCCESS, PENDING, FAILED, CANCELLED, COMPLETED, PROCESSING, ERROR")
     @Column(name = "transaction_status")
     private String transactionStatus;
 
     @NotBlank(message = "Instrument is required")
-    @Pattern(regexp = "^(CREDITCARD|DEBITCARD|UPI|WALLET|CASH|BANK_TRANSFER|CHEQUE)$", 
+    @Pattern(regexp = "^(CREDITCARD|DEBITCARD|UPI|WALLET|CASH|BANK_TRANSFER|CHEQUE)$",
              message = "Instrument must be one of: CREDITCARD, DEBITCARD, UPI, WALLET, CASH, BANK_TRANSFER, CHEQUE")
     @Column(name = "instrument")
     private String instrument;

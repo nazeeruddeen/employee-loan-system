@@ -600,3 +600,98 @@ body.app-dark-theme .mat-mdc-dialog-container .form-label {
 .example-container.dark-theme .mat-card-actions button {
   border-radius: 24px !important;
 }
+/* Brand refresh: unified light theme palette */
+:root {
+  --brand-primary: #0b5cab;
+  --brand-primary-dark: #084b8a;
+  --brand-primary-soft: #e8f0fb;
+  --brand-surface: #f5f8fd;
+  --brand-border: #d4e0f1;
+  --brand-text: #1b2b41;
+}
+
+body:not(.app-dark-theme) {
+  background-color: var(--brand-surface);
+  color: var(--brand-text);
+}
+
+body:not(.app-dark-theme) a,
+body:not(.app-dark-theme) .back-link,
+body:not(.app-dark-theme) .text-primary {
+  color: var(--brand-primary) !important;
+}
+
+body:not(.app-dark-theme) .card {
+  border: 1px solid var(--brand-border);
+  box-shadow: 0 8px 20px rgba(11, 92, 171, 0.08);
+}
+
+body:not(.app-dark-theme) .card .card-header {
+  background: #ffffff !important;
+  color: var(--brand-primary-dark) !important;
+  border-bottom: 1px solid var(--brand-border) !important;
+  box-shadow: none !important;
+}
+
+body:not(.app-dark-theme) .card .card-header.text-white,
+body:not(.app-dark-theme) .card .card-header h5,
+body:not(.app-dark-theme) .card .card-header h6,
+body:not(.app-dark-theme) .card .card-header .mb-0,
+body:not(.app-dark-theme) .card .card-header i {
+  color: var(--brand-primary-dark) !important;
+}
+
+body:not(.app-dark-theme) .table thead th,
+body:not(.app-dark-theme) .table-primary th,
+body:not(.app-dark-theme) .mat-header-row {
+  background-color: var(--brand-primary) !important;
+  border-bottom-color: var(--brand-primary-dark) !important;
+  color: #ffffff !important;
+}
+
+body:not(.app-dark-theme) .table-hover tbody tr:hover {
+  background-color: rgba(11, 92, 171, 0.06) !important;
+}
+
+
+body:not(.app-dark-theme) .form-control:focus,
+body:not(.app-dark-theme) .form-select:focus,
+body:not(.app-dark-theme) .mat-form-field.mat-focused .mat-form-field-ripple {
+  border-color: var(--brand-primary) !important;
+  box-shadow: 0 0 0 0.2rem rgba(11, 92, 171, 0.2) !important;
+  background-color: #ffffff;
+}
+
+body:not(.app-dark-theme) .bg-primary,
+body:not(.app-dark-theme) .bg-info {
+  background-color: var(--brand-primary) !important;
+}
+
+body:not(.app-dark-theme) .badge.bg-info {
+  background-color: var(--brand-primary-soft) !important;
+  color: var(--brand-primary-dark) !important;
+}
+
+body:not(.app-dark-theme) .sidenav {
+  background: var(--brand-primary) !important;
+}
+
+body:not(.app-dark-theme) .module-nav-tabs .link-tab {
+  color: var(--brand-primary) !important;
+}
+
+body:not(.app-dark-theme) .module-nav-tabs .link-tab:hover {
+  background: rgba(11, 92, 171, 0.12) !important;
+}
+
+body:not(.app-dark-theme) .module-nav-tabs .link-tab-active {
+  background: var(--brand-primary) !important;
+  color: #ffffff !important;
+}
+
+body:not(.app-dark-theme) .module-nav-tabs .link-tab-active:hover {
+  background: var(--brand-primary-dark) !important;
+}
+
+
+

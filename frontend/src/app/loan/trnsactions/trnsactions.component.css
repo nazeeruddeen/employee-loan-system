@@ -8,20 +8,23 @@
 .card-header {
   border-radius: 10px 10px 0 0 !important;
   border-bottom: 2px solid #e9ecef;
-  background: linear-gradient(135deg, #0dcaf0 0%, #0aa2c0 100%);
+  background: linear-gradient(135deg, #0b5cab 0%, #084b8a 100%);
 }
 
 /* Enhanced Table Styling */
 .table-responsive {
   border-radius: 8px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .table {
   margin-bottom: 0;
-  table-layout: fixed;
-  width: 100%;
+  table-layout: auto;
+  min-width: 1400px;
+  width: max-content;
 }
 
 .table th {
@@ -29,8 +32,8 @@
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-bottom: 2px solid #0dcaf0;
-  background-color: #0dcaf0 !important;
+  border-bottom: 2px solid #0b5cab;
+  background-color: #0b5cab !important;
   color: white !important;
   text-align: center;
   vertical-align: middle;
@@ -50,7 +53,7 @@
 }
 
 /* Specific column widths for better alignment - IMPROVED */
-.table th:nth-child(1), .table td:nth-child(1) { width: 100px; min-width: 100px; } /* Txn Date */
+.table th:nth-child(1), .table td:nth-child(1) { width: 160px; min-width: 160px; } /* Txn Date & Time */
 .table th:nth-child(2), .table td:nth-child(2) { width: 120px; min-width: 120px; } /* Activity */
 .table th:nth-child(3), .table td:nth-child(3) { width: 120px; min-width: 120px; } /* Instrument */
 .table th:nth-child(4), .table td:nth-child(4) { width: 120px; min-width: 120px; } /* Txn ID */
@@ -70,7 +73,7 @@
 }
 
 .table-hover tbody tr:hover {
-  background-color: rgba(13, 202, 240, 0.05);
+  background-color: rgba(11, 92, 171, 0.06);
 }
 
 /* Form Control Styling */
@@ -83,8 +86,8 @@
 }
 
 .form-control:focus, .form-select:focus {
-  border-color: #0dcaf0;
-  box-shadow: 0 0 0 0.2rem rgba(13, 202, 240, 0.25);
+  border-color: #0b5cab;
+  box-shadow: 0 0 0 0.2rem rgba(11, 92, 171, 0.25);
 }
 
 .form-control-sm {
@@ -108,8 +111,22 @@
 }
 
 .form-control[type="file"]:hover {
-  border-color: #0dcaf0;
-  background-color: #e0f7fa;
+  border-color: #0b5cab;
+  background-color: #e8f0fb;
+}
+
+.upload-panel {
+  background: #ffffff;
+  border: 1px solid var(--brand-border, #d4e0f1);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.section-title {
+  color: var(--brand-primary, #0b5cab);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
 }
 
 /* Button improvements */
@@ -251,5 +268,8 @@
 
 /* Hover effects for table rows */
 .table-hover tbody tr:hover {
-  background-color: rgba(13, 202, 240, 0.05);
+  background-color: rgba(11, 92, 171, 0.06);
 }
+
+
+

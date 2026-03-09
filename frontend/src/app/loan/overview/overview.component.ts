@@ -71,24 +71,34 @@ export class OverviewComponent implements OnDestroy {
   }
 
   private syncTabFromUrl() {
+    const queryTab = this.route.snapshot.queryParams['tab'] || this.route.parent?.snapshot?.queryParams['tab'];
+    if (queryTab) {
+      const queryIndex = TAB_KEYS.indexOf(queryTab);
+      if (queryIndex >= 0 && queryIndex !== this.selectedTabIndex) {
+        this.selectedTabIndex = queryIndex;
+      }
+      return;
+    }
+
     const path = this.router.url.split('?')[0];
     const seg = path.split('/').pop() || '';
     const idx = TAB_KEYS.indexOf(seg);
-    if (idx >= 0 && idx !== this.selectedTabIndex) this.selectedTabIndex = idx;
-    else if (seg === '' || seg === 'loan') {
-      const tab = this.route.snapshot.queryParams['tab'];
-      if (tab) {
-        const i = TAB_KEYS.indexOf(tab);
-        if (i >= 0) this.selectedTabIndex = i;
-      }
+    if (idx >= 0 && idx !== this.selectedTabIndex) {
+      this.selectedTabIndex = idx;
+    } else if (seg === '' || seg === 'loan') {
+      this.selectedTabIndex = 0;
     }
   }
-
   onTabChange(index: number) {
     this.selectedTabIndex = index;
-    const tabPath = TAB_KEYS[index];
-    this.router.navigate(['/loan', tabPath], {
-      queryParams: { id: this.id },
+    const tabKey = TAB_KEYS[index] || TAB_KEYS[0];
+    const queryParams: { [key: string]: string } = { tab: tabKey };
+    if (this.id) {
+      queryParams['id'] = this.id;
+    }
+
+    this.router.navigate(['/loan/overview'], {
+      queryParams,
       replaceUrl: true
     });
   }
@@ -118,3 +128,4 @@ export class OverviewComponent implements OnDestroy {
     this.querySub?.unsubscribe();
   }
 }
+

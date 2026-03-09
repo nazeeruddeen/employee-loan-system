@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -14,7 +14,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     @Query("SELECT t FROM Transaction t WHERE t.loanApplication.appId = :appId " +
             "AND t.transactionDate BETWEEN :startDate AND :endDate")
-    List<Transaction> findByAppIdAndDateRange(Long appId, LocalDate startDate, LocalDate endDate);
+    List<Transaction> findByAppIdAndDateRange(Long appId, LocalDateTime startDate, LocalDateTime endDate);
 
     @Query("SELECT t FROM Transaction t WHERE t.loanApplication.appId = :appId " +
             "AND t.transactionStatus IN :statusList")

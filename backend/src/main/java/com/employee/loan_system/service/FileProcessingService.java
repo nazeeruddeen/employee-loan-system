@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -220,7 +221,7 @@ public class FileProcessingService {
         int instrumentColumn = findCsvColumnIndex(headerRow, "instrument", "mode", "payment mode", "channel", "source");
         int txnTypeColumn = findCsvColumnIndex(headerRow, "txn", "transaction type", "type");
         int idColumn = findCsvColumnIndex(headerRow, "id");
-        int txnIdColumn = findCsvColumnIndex(headerRow, "txn id", "transaction id", "reference", "utr", "ref no");
+        int txnIdColumn = findCsvColumnIndex(headerRow, "wallet txn id", "txn id", "transaction id", "reference", "utr", "ref no");
         int commentColumn = findCsvColumnIndex(headerRow, "comment", "remarks", "note");
         int debitColumn = findCsvColumnIndex(headerRow, "debit", "dr", "withdrawal", "sent", "paid");
         int creditColumn = findCsvColumnIndex(headerRow, "credit", "cr", "deposit", "received", "added");
@@ -242,7 +243,7 @@ public class FileProcessingService {
                         getCsvValue(row, dateColumn, 0),
                         getCsvValue(row, 0, -1)
                 );
-                LocalDate transactionDate = parseLocalDateFlexible(dateValue);
+                LocalDateTime transactionDate = parseLocalDateTimeFlexible(dateValue);
                 if (transactionDate == null) {
                     errors.add("Line " + (i + 1) + ": Invalid or missing transaction date");
                     continue;
@@ -285,9 +286,7 @@ public class FileProcessingService {
                 }
 
                 String comment = firstNonBlank(
-                        getCsvValue(row, commentColumn, 4),
-                        getCsvValue(row, breakupColumn, -1),
-                        activity
+                        getCsvValue(row, commentColumn, 4)
                 );
 
                 String statusRaw = firstNonBlank(
@@ -304,7 +303,7 @@ public class FileProcessingService {
                 dto.setComment(trimToLength(comment, 500));
                 dto.setDebtAmt(Math.max(0.0, debit));
                 dto.setCreditAmt(Math.max(0.0, credit));
-                dto.setTransactionBreakup(trimToLength(firstNonBlank(getCsvValue(row, breakupColumn, 7), activity), 1000));
+                dto.setTransactionBreakup(trimToLength(firstNonBlank(getCsvValue(row, breakupColumn, 7)), 1000));
                 dto.setTransactionStatus(normalizeStatus(statusRaw));
 
                 transactions.add(dto);
@@ -348,7 +347,7 @@ public class FileProcessingService {
         if (value == null) {
             return "";
         }
-        String cleaned = value.trim();
+        String cleaned = value.replace("\uFEFF", "").trim();
         if (cleaned.startsWith("\"") && cleaned.endsWith("\"") && cleaned.length() >= 2) {
             cleaned = cleaned.substring(1, cleaned.length() - 1);
         }
@@ -390,15 +389,26 @@ public class FileProcessingService {
         }
 
         for (int i = 0; i < header.length; i++) {
-            String value = cleanCsvValue(header[i]).toUpperCase();
+            String value = normalizeHeaderText(header[i]);
             for (String token : tokens) {
-                if (value.contains(token.toUpperCase())) {
+                if (value.contains(normalizeHeaderText(token))) {
                     return i;
                 }
             }
         }
 
         return -1;
+    }
+
+    private String normalizeHeaderText(String value) {
+        if (value == null) {
+            return "";
+        }
+        return cleanCsvValue(value)
+                .toUpperCase()
+                .replaceAll("[^A-Z0-9]", " ")
+                .replaceAll("\\s+", " ")
+                .trim();
     }
 
     private String getCsvValue(String[] row, int preferredIndex, int fallbackIndex) {
@@ -437,18 +447,35 @@ public class FileProcessingService {
         return trimmed.length() <= maxLength ? trimmed : trimmed.substring(0, maxLength);
     }
 
-    private LocalDate parseLocalDateFlexible(String value) {
+    private LocalDateTime parseLocalDateTimeFlexible(String value) {
         if (value == null || value.trim().isEmpty()) {
             return null;
         }
 
-        String input = value.trim();
-        String dateFromText = extractDateToken(input);
-        if (!dateFromText.isEmpty()) {
-            input = dateFromText;
+        String input = value.trim().replaceAll("\\s+", " ");
+
+        DateTimeFormatter[] dateTimeFormatters = {
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"),
+                DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"),
+                DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"),
+                DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"),
+                DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"),
+                DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss"),
+                DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm"),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")
+        };
+
+        for (DateTimeFormatter formatter : dateTimeFormatters) {
+            try {
+                return LocalDateTime.parse(input, formatter);
+            } catch (Exception ignored) {
+                // try next format
+            }
         }
 
-        DateTimeFormatter[] formatters = {
+        DateTimeFormatter[] dateFormatters = {
                 DateTimeFormatter.ofPattern("yyyy-MM-dd"),
                 DateTimeFormatter.ofPattern("dd-MM-yyyy"),
                 DateTimeFormatter.ofPattern("MM/dd/yyyy"),
@@ -457,9 +484,9 @@ public class FileProcessingService {
                 DateTimeFormatter.ofPattern("d/M/yyyy")
         };
 
-        for (DateTimeFormatter formatter : formatters) {
+        for (DateTimeFormatter formatter : dateFormatters) {
             try {
-                return LocalDate.parse(input, formatter);
+                return LocalDate.parse(input, formatter).atStartOfDay();
             } catch (Exception ignored) {
                 // try next format
             }
@@ -665,3 +692,4 @@ public class FileProcessingService {
         }
     }
 }
+

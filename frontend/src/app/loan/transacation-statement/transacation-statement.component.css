@@ -83,13 +83,16 @@
 /* Table Styling */
 .table-responsive {
   border-radius: 8px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .table {
   margin-bottom: 0;
-  table-layout: fixed;
-  width: 100%;
+  table-layout: auto;
+  min-width: 1450px;
+  width: max-content;
 }
 
 .table th {
@@ -97,8 +100,8 @@
   font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  border-bottom: 2px solid #0d6efd;
-  background-color: #0d6efd !important;
+  border-bottom: 2px solid var(--brand-primary, #0b5cab);
+  background-color: var(--brand-primary, #0b5cab) !important;
   color: white !important;
   text-align: center;
   vertical-align: middle;
@@ -117,16 +120,16 @@
   text-overflow: ellipsis;
 }
 
-/* Specific column widths for better alignment - IMPROVED */
-.table th:nth-child(1), .table td:nth-child(1) { width: 100px; min-width: 100px; } /* Date */
-.table th:nth-child(2), .table td:nth-child(2) { width: 120px; min-width: 120px; } /* Activity */
-.table th:nth-child(3), .table td:nth-child(3) { width: 120px; min-width: 120px; } /* Transaction ID */
-.table th:nth-child(4), .table td:nth-child(4) { width: 150px; min-width: 150px; } /* Comment */
-.table th:nth-child(5), .table td:nth-child(5) { width: 120px; min-width: 120px; } /* Debit Amount */
-.table th:nth-child(6), .table td:nth-child(6) { width: 120px; min-width: 120px; } /* Credit Amount */
-.table th:nth-child(7), .table td:nth-child(7) { width: 150px; min-width: 150px; } /* Transaction Breakup */
-.table th:nth-child(8), .table td:nth-child(8) { width: 100px; min-width: 100px; } /* Status */
-.table th:nth-child(9), .table td:nth-child(9) { width: 100px; min-width: 100px; } /* Instrument */
+/* Specific column widths for better alignment */
+.table th:nth-child(1), .table td:nth-child(1) { width: 170px; min-width: 170px; } /* Date & Time */
+.table th:nth-child(2), .table td:nth-child(2) { width: 190px; min-width: 190px; } /* Activity */
+.table th:nth-child(3), .table td:nth-child(3) { width: 170px; min-width: 170px; } /* Transaction ID */
+.table th:nth-child(4), .table td:nth-child(4) { width: 180px; min-width: 180px; } /* Comment */
+.table th:nth-child(5), .table td:nth-child(5) { width: 140px; min-width: 140px; } /* Debit Amount */
+.table th:nth-child(6), .table td:nth-child(6) { width: 140px; min-width: 140px; } /* Credit Amount */
+.table th:nth-child(7), .table td:nth-child(7) { width: 190px; min-width: 190px; } /* Transaction Breakup */
+.table th:nth-child(8), .table td:nth-child(8) { width: 130px; min-width: 130px; } /* Status */
+.table th:nth-child(9), .table td:nth-child(9) { width: 140px; min-width: 140px; } /* Instrument */
 
 /* Ensure table cells don't wrap */
 .table th, .table td {
@@ -137,7 +140,7 @@
 }
 
 .table-hover tbody tr:hover {
-  background-color: rgba(13, 110, 253, 0.05);
+  background-color: rgba(11, 92, 171, 0.06);
 }
 
 /* Badge Styling */
@@ -206,3 +209,5 @@
 .table-responsive::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
 }
+
+

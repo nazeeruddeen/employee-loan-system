@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SharedModule } from '../../shared/shared.module';
 import { environment } from '../../../environments/environment';
 
@@ -87,7 +87,7 @@ export class TrnsactionsComponent {
 
   createTransactionGroup(transaction: any = {}): FormGroup {
     return this.fb.group({
-      transactionDate: [transaction.transactionDate || '', Validators.required],
+      transactionDate: [this.toDateTimeLocalInput(transaction.transactionDate), Validators.required],
       activity: [transaction.activity || '', Validators.required],
       instrument: [transaction.instrument || '', Validators.required],
       txnId: [transaction.txnId || '', Validators.required],
@@ -115,7 +115,10 @@ export class TrnsactionsComponent {
     this.isLoading = true;
     this.clearMessages();
 
-    const formData = this.transactionsFormArray.value;
+    const formData = this.transactionsFormArray.value.map((transaction: any) => ({
+      ...transaction,
+      transactionDate: this.toIsoDateTime(transaction.transactionDate)
+    }));
 
     this.http.post<any[]>(this.apiBase + '/loans/sales/saveTxnsData/' + this.id, formData).subscribe(
       response => {
@@ -173,6 +176,53 @@ export class TrnsactionsComponent {
     if (this.data.length > 0) {
       this.populateForm(this.data);
     }
+  }
+
+  private toDateTimeLocalInput(value: any): string {
+    if (!value) {
+      return '';
+    }
+
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(trimmed)) {
+        return trimmed.slice(0, 16);
+      }
+      if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+        return `${trimmed}T00:00`;
+      }
+    }
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+
+  private toIsoDateTime(value: string): string {
+    if (!value || !value.trim()) {
+      return value;
+    }
+
+    const trimmed = value.trim();
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+      return `${trimmed}T00:00:00`;
+    }
+
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(trimmed)) {
+      return `${trimmed}:00`;
+    }
+
+    return trimmed;
   }
 
   clearMessages() {
